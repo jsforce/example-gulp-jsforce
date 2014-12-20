@@ -1,0 +1,26 @@
+{
+  "name": "auradev",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^7.0.3",
+    "coffee-script": "^1.8.0",
+    "coffeeify": "^1.0.0",
+    "gulp": "^3.8.10",
+    "gulp-zip": "^2.0.2",
+    "lodash": "^2.4.1",
+    "through2": "^0.6.3",
+    "vinyl-source-stream": "^1.0.0"
+  },
+  "browserify": {
+    "transform": [
+      "coffeeify"
+    ]
+  }
+}
