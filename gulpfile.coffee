@@ -10,43 +10,43 @@ del = require "del"
 through2 = require "through2"
 jsforce = require "jsforce"
 
-#
+# Building CSS files from LESS source
 gulp.task "css", ->
   gulp.src "./src/styles/main.less"
     .pipe less()
     .pipe minify()
     .pipe gulp.dest "./build/css"
 
-#
+# Compile and bundle JS file from CoffeeScript source code
 gulp.task "js", ->
   browserify
     entries: [ "./src/scripts/main.coffee" ]
     extensions: [ ".coffee" ]
   .bundle()
   .pipe source "main.js"
-#  .pipe streamify uglify()
+  .pipe streamify uglify()
   .pipe gulp.dest "./build/js"
 
-# 
+# Copy all static files in src directory to temporary build directory
 gulp.task "statics", ->
   gulp.src [ "./src/**/*.html", "./src/images/**/*" ], base: "./src"
     .pipe gulp.dest "./build"
 
-#
+# Zip all built files as a static resource file
 gulp.task "zip", [ "css", "js", "statics" ], ->
   gulp.src "./build/**/*"
     .pipe zip("MyApp.resource")
     .pipe gulp.dest "./pkg/staticresources"
 
-#
+# Build
+gulp.task "build", [ "zip" ]
+
+# Cleanup built files
 gulp.task "clean", ->
   del [ "./build" ]
 
-#
-gulp.task "build", [ "zip" ]
-
 ###
-# 
+# Returns a stream pipe for deploying zipped package to Salesforce
 ###
 forceDeploy = (username, password) ->
   through2.obj (file, enc, callback) ->
@@ -72,9 +72,9 @@ gulp.task "deploy", ->
     .pipe forceDeploy(process.env.SF_USERNAME, process.env.SF_PASSWORD)
 
 #
-gulp.task "watch", [ "build" ], ->
+gulp.task "watch", ->
   gulp.watch "./src/**/*", [ "build" ]
   gulp.watch "./pkg/**/*", [ "deploy" ]
 
-#
+# Default entry point
 gulp.task "default", [ "build", "deploy" ]
