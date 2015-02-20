@@ -7,8 +7,7 @@ minify = require "gulp-minify-css"
 browserify = require "browserify"
 source = require "vinyl-source-stream"
 del = require "del"
-through2 = require "through2"
-jsforce = require "jsforce"
+forceDeploy = require "gulp-jsforce-deploy"
 
 # Building CSS files from LESS source
 gulp.task "css", ->
@@ -46,30 +45,18 @@ gulp.task "clean", ->
   del [ "./build" ]
 
 ###
-# Returns a stream pipe for deploying zipped package to Salesforce
-###
-forceDeploy = (username, password) ->
-  through2.obj (file, enc, callback) ->
-    conn = new jsforce.Connection()
-    conn.login username, password
-    .then ->
-      conn.metadata.deploy(file.contents).complete(details: true)
-    .then (res) ->
-      if res.details?.componentFailures
-        console.error res.details?.componentFailures
-        return callback(new Error('Deploy failed.'))
-      callback()
-    , (err) ->
-      console.error(err)
-      callback(err)
-
-###
 # Deploying package to Salesforce
 ###
 gulp.task "deploy", ->
   gulp.src "./pkg/**/*", base: "."
     .pipe zip("pkg.zip")
-    .pipe forceDeploy(process.env.SF_USERNAME, process.env.SF_PASSWORD)
+    .pipe forceDeploy
+      username: process.env.SF_USERNAME
+      password: process.env.SF_PASSWORD
+      # loginUrl: "https://test.salesforce.com"
+      # pollTimeout: 120*1000
+      # pollInterval: 10*1000
+      # version: '33.0'
 
 #
 gulp.task "watch", ->
